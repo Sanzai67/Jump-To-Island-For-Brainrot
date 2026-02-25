@@ -17,38 +17,26 @@
     position: relative;
   }
 
-  /* Animated Glowing Background */
-  body::before {
-    content: '';
+  /* Particle Grid Background */
+  canvas#background {
     position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at 50% 50%, #00ffff 0%, #0a0a0a 70%);
-    animation: pulse 25s linear infinite;
+    top: 0;
+    left: 0;
     z-index: -1;
-    opacity: 0.6;
-  }
-
-  @keyframes pulse {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(1.1); }
-    100% { transform: rotate(360deg) scale(1); }
+    width: 100%;
+    height: 100%;
   }
 
   /* Header */
   header {
     text-align: center;
     padding: 2rem;
-    border-bottom: 2px solid #00ffff;
+    border-bottom: 2px solid #0a0a0a;
     background: rgba(0,0,0,0.5);
-    box-shadow: 0 0 20px #00ffff;
   }
 
   header h1 {
-    color: #00ffff;
-    text-shadow: 0 0 10px #00ffff;
+    color: #fff;
     font-size: 3rem;
   }
 
@@ -59,7 +47,6 @@
     gap: 2rem;
     padding: 1rem;
     background: rgba(0,0,0,0.7);
-    box-shadow: 0 0 15px #00ffff;
   }
 
   nav a {
@@ -72,7 +59,7 @@
 
   nav a:hover {
     color: #00ffff;
-    text-shadow: 0 0 8px #00ffff;
+    text-shadow: 0 0 10px #00ffff;
   }
 
   /* Main Content */
@@ -83,8 +70,7 @@
   }
 
   h2 {
-    color: #00ffff;
-    text-shadow: 0 0 5px #00ffff;
+    color: #fff;
     margin-bottom: 1rem;
   }
 
@@ -98,32 +84,34 @@
     margin-bottom: 2rem;
   }
 
-  /* Card-like sections */
+  /* Card-like sections with hover glow */
   section {
     background: rgba(0,0,0,0.6);
-    border: 1px solid #00ffff;
+    border: 1px solid #0a0a0a;
     padding: 1.5rem;
     border-radius: 12px;
-    box-shadow: 0 0 15px #00ffff;
     margin-bottom: 2rem;
     transition: 0.3s;
   }
 
   section:hover {
-    box-shadow: 0 0 25px #00ffff;
+    border-color: #00ffff;
+    box-shadow: 0 0 20px #00ffff;
   }
 
   /* Footer */
   footer {
     text-align: center;
     padding: 1.5rem;
-    border-top: 2px solid #00ffff;
+    border-top: 2px solid #0a0a0a;
     background: rgba(0,0,0,0.5);
-    box-shadow: 0 0 15px #00ffff inset;
   }
 </style>
 </head>
 <body>
+
+<canvas id="background"></canvas>
+
 <header>
   <h1>Jump To Island For Brainrot Wiki</h1>
 </header>
@@ -168,6 +156,78 @@
 <footer>
   &copy; 2026 Jump To Island For Brainrot. All Rights Reserved.
 </footer>
+
+<script>
+  const canvas = document.getElementById('background');
+  const ctx = canvas.getContext('2d');
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
+
+  const gridSpacing = 80;
+  const particles = [];
+
+  class Particle {
+    constructor(x, y){
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random()-0.5)*0.5;
+      this.vy = (Math.random()-0.5)*0.5;
+      this.size = Math.random()*2+1;
+    }
+    move(){
+      this.x += this.vx;
+      this.y += this.vy;
+      if(this.x<0) this.x=width;
+      if(this.x>width) this.x=0;
+      if(this.y<0) this.y=height;
+      if(this.y>height) this.y=0;
+    }
+    draw(){
+      ctx.fillStyle = '#00ffff';
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  for(let i=0;i<200;i++){
+    particles.push(new Particle(Math.random()*width,Math.random()*height));
+  }
+
+  function drawGrid(){
+    ctx.strokeStyle = 'rgba(0,255,255,0.05)';
+    ctx.lineWidth = 1;
+    for(let x=0;x<width;x+=gridSpacing){
+      ctx.beginPath();
+      ctx.moveTo(x,0);
+      ctx.lineTo(x,height);
+      ctx.stroke();
+    }
+    for(let y=0;y<height;y+=gridSpacing){
+      ctx.beginPath();
+      ctx.moveTo(0,y);
+      ctx.lineTo(width,y);
+      ctx.stroke();
+    }
+  }
+
+  function animate(){
+    ctx.clearRect(0,0,width,height);
+    drawGrid();
+    particles.forEach(p=>{
+      p.move();
+      p.draw();
+    });
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  window.addEventListener('resize', ()=>{
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  });
+</script>
 
 </body>
 </html>
